@@ -51,35 +51,75 @@
             background-color: #218838;
         }
         .stage-control {
-            background-color: #343a40;
+            position: relative;
+            height: 76px;
+            background-color: #1c1f20;
             border-radius: 8px;
             overflow: hidden;
         }
+        .stage-control::before,
+        .stage-control::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            width: 1px;
+            height: 16px;
+            background-color: #484d50;
+            pointer-events: none;
+        }
+        .stage-control::before {
+            top: 8px;
+        }
+        .stage-control::after {
+            bottom: 8px;
+        }
         #stageLabel {
-            padding: 0.75rem 0 0.25rem;
-            font-size: 1rem;
-            text-align: center;
-            color: #cccccc;
+            position: absolute;
+            z-index: 1;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 0 0.625rem;
+            font-size: 1.375rem;
+            font-weight: 500;
+            background-color: #1c1f20;
+            color: #f0f2f3;
+            pointer-events: none;
         }
         .stage-buttons {
             display: flex;
+            height: 100%;
         }
         .stage-buttons button {
             flex: 1;
-            padding: 0.5rem 1rem 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
             border-radius: 0;
             background-color: transparent;
-            color: #ffffff;
-        }
-        .stage-buttons button + button {
-            border-left: 1px solid #555b61;
+            color: #d6dce0;
+            touch-action: manipulation;
         }
         .stage-buttons button:active:not(:disabled) {
-            background-color: #23272b;
+            background-color: #2a2f32;
+        }
+        .stage-buttons button:focus-visible {
+            outline: 2px solid #a6b5be;
+            outline-offset: -4px;
         }
         .stage-buttons button:disabled {
             background-color: transparent;
-            color: #747a80;
+            color: #747b7f;
+        }
+        .stage-buttons svg {
+            width: 32px;
+            height: 32px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 1.75;
+            stroke-linecap: round;
+            stroke-linejoin: round;
         }
         #stopBtn {
             background-color: #ffffff;
@@ -107,8 +147,16 @@
         <div class="stage-control" role="group" aria-labelledby="stageLabel">
             <div id="stageLabel">Stage</div>
             <div class="stage-buttons">
-                <button id="prevBtn" aria-label="Previous stage" disabled>&larr;</button>
-                <button id="nextBtn" aria-label="Next stage" disabled>&rarr;</button>
+                <button id="prevBtn" aria-label="Previous stage" disabled>
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="m10 5-7 7 7 7m11-14-7 7 7 7" />
+                    </svg>
+                </button>
+                <button id="nextBtn" aria-label="Next stage" disabled>
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="m3 5 7 7-7 7m11-14 7 7-7 7" />
+                    </svg>
+                </button>
             </div>
         </div>
         <button id="stopBtn" disabled>Stop</button>
