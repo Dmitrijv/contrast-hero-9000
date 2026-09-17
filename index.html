@@ -63,7 +63,7 @@
             position: absolute;
             left: 50%;
             width: 1px;
-            height: 16px;
+            height: 15px;
             background-color: #484d50;
             pointer-events: none;
         }
@@ -76,11 +76,12 @@
         #stageLabel {
             position: absolute;
             z-index: 1;
-            top: 50%;
+            top: calc(50% - 3px);
             left: 50%;
             transform: translate(-50%, -50%);
             padding: 0 0.625rem;
             font-size: 1.375rem;
+            line-height: 24px;
             font-weight: 500;
             background-color: #1c1f20;
             color: #f0f2f3;
