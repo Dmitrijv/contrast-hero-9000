@@ -85,11 +85,6 @@
             color: #d6dce0;
             touch-action: manipulation;
         }
-        @media (hover: hover) {
-            .stage-buttons button:hover:not(:disabled) {
-                background-color: #24282a;
-            }
-        }
         .stage-buttons button:active:not(:disabled) {
             background-color: #2a2f32;
         }
@@ -100,6 +95,11 @@
         .stage-buttons button:disabled {
             background-color: transparent;
             color: #747b7f;
+        }
+        @media (hover: hover) {
+            .stage-buttons button:hover {
+                background-color: #24282a;
+            }
         }
         .stage-buttons svg {
             width: 32px;
