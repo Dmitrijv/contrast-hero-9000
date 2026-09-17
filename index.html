@@ -50,12 +50,36 @@
         #startBtn:active:not(:disabled) {
             background-color: #218838;
         }
-        #nextBtn {
+        .stage-control {
             background-color: #343a40;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        #stageLabel {
+            padding: 0.75rem 0 0.25rem;
+            font-size: 1rem;
+            text-align: center;
+            color: #cccccc;
+        }
+        .stage-buttons {
+            display: flex;
+        }
+        .stage-buttons button {
+            flex: 1;
+            padding: 0.5rem 1rem 0.75rem;
+            border-radius: 0;
+            background-color: transparent;
             color: #ffffff;
         }
-        #nextBtn:active:not(:disabled) {
+        .stage-buttons button + button {
+            border-left: 1px solid #555b61;
+        }
+        .stage-buttons button:active:not(:disabled) {
             background-color: #23272b;
+        }
+        .stage-buttons button:disabled {
+            background-color: transparent;
+            color: #747a80;
         }
         #stopBtn {
             background-color: #ffffff;
@@ -80,7 +104,13 @@
     <div id="display">00:00</div>
     <div class="controls">
         <button id="startBtn">Start</button>
-        <button id="nextBtn" disabled>Next Stage</button>
+        <div class="stage-control" role="group" aria-labelledby="stageLabel">
+            <div id="stageLabel">Stage</div>
+            <div class="stage-buttons">
+                <button id="prevBtn" aria-label="Previous stage" disabled>&larr;</button>
+                <button id="nextBtn" aria-label="Next stage" disabled>&rarr;</button>
+            </div>
+        </div>
         <button id="stopBtn" disabled>Stop</button>
     </div>
 
@@ -95,6 +125,7 @@
         const displayEl = document.getElementById('display');
         const statusEl = document.getElementById('status');
         const startBtn = document.getElementById('startBtn');
+        const prevBtn = document.getElementById('prevBtn');
         const nextBtn = document.getElementById('nextBtn');
         const stopBtn = document.getElementById('stopBtn');
 
@@ -133,6 +164,7 @@
             const m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
             const s = (timeLeft % 60).toString().padStart(2, '0');
             displayEl.textContent = `${m}:${s}`;
+            prevBtn.disabled = currentPhase === 'idle' || (currentPhase === 'hot' && cyclesLeft === 3);
         }
 
         function tick(silent = false) {
@@ -163,6 +195,18 @@
                     statusEl.style.color = '#4bff4b';
                 }
             }
+            updateDisplay();
+        }
+
+        function previousStage() {
+            if (currentPhase === 'idle' || (currentPhase === 'hot' && cyclesLeft === 3)) return;
+
+            if (currentPhase === 'hot') cyclesLeft++;
+            currentPhase = currentPhase === 'hot' ? 'cold' : 'hot';
+            timeLeft = currentPhase === 'hot' ? 180 : 60;
+
+            statusEl.textContent = `${currentPhase === 'hot' ? 'Hot' : 'Cold'} Phase - Cycle ${4 - cyclesLeft}/3`;
+            statusEl.style.color = currentPhase === 'hot' ? '#ff4b4b' : '#00d2ff';
             updateDisplay();
         }
 
@@ -213,11 +257,13 @@
             displayEl.textContent = '00:00';
             
             startBtn.disabled = false;
+            prevBtn.disabled = true;
             nextBtn.disabled = true;
             stopBtn.disabled = true;
         }
 
         startBtn.addEventListener('click', startTimer);
+        prevBtn.addEventListener('click', previousStage);
         nextBtn.addEventListener('click', nextStage);
         stopBtn.addEventListener('click', stopTimer);
     </script>
