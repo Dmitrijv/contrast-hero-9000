@@ -51,7 +51,7 @@
         #startBtn {
             background-color: #28a745;
         }
-        #startBtn:active:not(:disabled) {
+        #startBtn:active:not(:disabled), #startBtn.touching:not(:disabled) {
             background-color: #218838;
         }
         .stage-control {
@@ -105,6 +105,12 @@
                 background-color: #24282a;
             }
         }
+        .stage-buttons button.touching {
+            background-color: #24282a;
+        }
+        button.touching {
+            transition: none;
+        }
         .stage-buttons svg {
             width: 32px;
             height: 32px;
@@ -118,7 +124,7 @@
             background-color: #ffffff;
             color: #000000;
         }
-        #stopBtn:active:not(:disabled) {
+        #stopBtn:active:not(:disabled), #stopBtn.touching:not(:disabled) {
             background-color: #e2e2e2;
         }
         button:disabled {
@@ -188,8 +194,21 @@
             }
         }
 
-        function playAlert(frequency) {
+        async function resumeAudio() {
+            if (!audioCtx || audioCtx.state === 'running') return;
+
+            try {
+                await audioCtx.resume();
+            } catch (err) {
+                console.warn('Audio could not resume.', err);
+            }
+        }
+
+        async function playAlert(frequency) {
             if (!audioCtx) return;
+            if (audioCtx.state !== 'running') await resumeAudio();
+            if (audioCtx.state !== 'running') return;
+
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
             osc.type = 'sine';
@@ -258,12 +277,20 @@
         }
 
         function startTimer() {
+            // Use media volume on iOS, including in silent mode.
+            if (navigator.audioSession) navigator.audioSession.type = 'playback';
+
             if (!audioCtx) {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             }
-            if (audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
+            resumeAudio();
+
+            // Unlock output during the tap, before the first timed alert.
+            const source = audioCtx.createBufferSource();
+            source.buffer = audioCtx.createBuffer(1, 1, audioCtx.sampleRate);
+            source.connect(audioCtx.destination);
+            source.onended = () => source.disconnect();
+            source.start();
 
             requestWakeLock();
 
@@ -302,6 +329,21 @@
             nextBtn.disabled = true;
             stopBtn.disabled = true;
         }
+
+        document.querySelectorAll('button').forEach(button => {
+            button.addEventListener('touchstart', () => button.classList.add('touching'), { passive: true });
+
+            for (const event of ['touchend', 'touchcancel', 'touchmove']) {
+                button.addEventListener(event, () => button.classList.remove('touching'), { passive: true });
+            }
+        });
+
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden && currentPhase !== 'idle') resumeAudio();
+        });
+        document.addEventListener('click', () => {
+            if (currentPhase !== 'idle') resumeAudio();
+        });
 
         startBtn.addEventListener('click', startTimer);
         prevBtn.addEventListener('click', previousStage);
